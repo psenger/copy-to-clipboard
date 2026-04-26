@@ -1,0 +1,37 @@
+# Agent OS Standards Index
+
+global:
+  coupling-cohesion:
+    description: Needs description - run /index-standards
+  delegation:
+    description: Needs description - run /index-standards
+  dry:
+    description: Needs description - run /index-standards
+  gang-of-four:
+    description: Needs description - run /index-standards
+  hexagonal-architecture:
+    description: Needs description - run /index-standards
+  object-interaction:
+    description: Needs description - run /index-standards
+  progressive-enhancement:
+    description: Needs description - run /index-standards
+  simplicity:
+    description: Needs description - run /index-standards
+  solid:
+    description: Needs description - run /index-standards
+  tdd-workflow:
+    description: Needs description - run /index-standards
+  value-objects:
+    description: Needs description - run /index-standards
+
+clipboard:
+  pasteboard:
+    description: NSPasteboard write pattern — usedEncoding for emoji/Windows/UTF-16 files, setString not setData
+
+logging:
+  patterns:
+    description: Always-on OSLog at .debug level — no config toggle, stripped from release builds automatically
+
+macos:
+  services:
+    description: NSServices Info.plist registration, first-launch pbs -update, and single-file handler pattern
