@@ -30,7 +30,7 @@ clipboard:
 
 logging:
   patterns:
-    description: Always-on OSLog at .debug level — no config toggle, stripped from release builds automatically
+    description: OSLog .debug for flow, .error for failures — no config toggle, .debug stripped from release builds automatically
 
 macos:
   services:

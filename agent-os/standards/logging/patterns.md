@@ -1,6 +1,6 @@
 ---
 name: Logging Patterns
-description: Always-on OSLog at .debug level — no config toggle, stripped from release builds automatically
+description: OSLog with .debug for flow and .error for failures — no config toggle, .debug stripped from release builds automatically
 type: project
 ---
 
@@ -12,15 +12,16 @@ Use Apple's unified logging (`Logger`) exclusively — no file output, no runtim
 
 ```swift
 import OSLog
-private let logger = Logger(subsystem: "com.yourapp.copy-to-clipboard", category: "main")
+private let logger = Logger(subsystem: "com.psenger.copy-to-clipboard", category: "main")
 ```
 
 ## Rules
 
-- Log at `.debug` level everywhere — OSLog strips `.debug` from release builds automatically
-- No `enabled` flag or config check — logging is always on in debug, always off in release
+- Use `.debug` for normal flow — OSLog strips `.debug` entries from release builds automatically
+- Use `.error` for failures — `.error` is always persisted regardless of build type
+- No `enabled` flag or config check — logging is always on in debug, always off in release for `.debug`
 - Never log file contents — log file paths or metadata only
-- View logs in Console.app filtered by subsystem `com.yourapp.copy-to-clipboard`
+- View logs in Console.app filtered by subsystem `com.psenger.copy-to-clipboard`
 
 ## Levels
 
