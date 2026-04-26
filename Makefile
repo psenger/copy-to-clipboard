@@ -20,6 +20,7 @@ install: build
 	mkdir -p "$(INSTALL)"
 	cp -R "$(BUILD_DIR)/Build/Products/Release/$(APP)" "$(INSTALL)/"
 	@echo "Installed to $(INSTALL)/$(APP)"
+	$(MAKE) clean
 
 dmg: build
 	rm -f "$(DMG)"
@@ -27,6 +28,7 @@ dmg: build
 		-srcfolder "$(BUILD_DIR)/Build/Products/Release/$(APP)" \
 		-ov -format UDZO "$(DMG)"
 	@echo "DMG created: $(DMG)"
+	$(MAKE) clean
 
 clean:
 	rm -rf $(BUILD_DIR)
