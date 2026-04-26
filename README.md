@@ -76,7 +76,7 @@ paste targets always receive Unicode regardless of the original file encoding.
 ```bash
 git clone https://github.com/psenger/copy-to-clipboard.git
 cd copy-to-clipboard
-make test     # 10 tests, ~91% line coverage
+make test     # 11 tests, ~91% line coverage
 make build    # Release build → build/Build/Products/Release/
 ```
 
