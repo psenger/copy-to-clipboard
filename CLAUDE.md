@@ -8,7 +8,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 make build    # Release build → build/Build/Products/Release/copy-to-clipboard.app
 make test     # Run all tests
 make install  # Build and copy to ~/Applications
+make dmg      # Build and create copy-to-clipboard.dmg in project root
 make clean    # Remove build/
+```
+
+After `make install`, copy to `/Applications` and restart Finder:
+```bash
+sudo cp -R ~/Applications/copy-to-clipboard.app /Applications/
+killall Finder
 ```
 
 Run a single test:
@@ -25,16 +32,36 @@ log stream --predicate 'subsystem == "com.psenger.copy-to-clipboard"' --level de
 
 ## Architecture
 
-This is a **launch-on-demand macOS Services helper** — no UI, no menu-bar icon, no persistent process. macOS wakes it per invocation via the NSServices mechanism and it exits after each call.
+The app has two components:
 
-Two source files do all the work:
+**Main app** (`src/`) — a background-only NSServices helper. macOS wakes it per invocation; it exits after each call. On macOS versions where NSServices works, right-clicking a text file in Finder shows the item in the Services submenu.
 
-- **`src/AppDelegate.swift`** — receives the file URL from the Services framework via `copyFileContents(_:userData:error:)`, runs `pbs -update` on first launch to register with Finder, then delegates to `ClipboardService`.
-- **`src/ClipboardService.swift`** — checks the file's UTI, decodes the file to a Swift `String`, writes it to `NSPasteboard.general`.
+**FinderSync extension** (`extension/`) — a sandboxed app extension that adds "Copy Contents to Clipboard" **directly** to Finder's right-click context menu (not in a submenu). This is the primary mechanism on macOS 26 (Tahoe), where the NSServices approach no longer surfaces in Finder menus.
 
-The NSServices entry point is wired in `src/Info.plist` under `NSServices`. The `NSMessage` key (`copyFileContents`) must match the `@objc` method name on `AppDelegate`. The `NSSendFileTypes = public.text` key is the sole type gate — it controls which files show the menu item in Finder.
+Source files:
+
+- **`src/AppDelegate.swift`** — receives the file URL via `copyFileContents(_:userData:error:)`, runs `pbs -update` on every launch to register with Finder, delegates to `ClipboardService`.
+- **`src/ClipboardService.swift`** — checks the file's UTI, decodes the file to a Swift `String`, writes it to `NSPasteboard.general`. Shared by both the main app and the extension.
+- **`extension/FinderSyncExtension.swift`** — `FIFinderSync` subclass. Sets `directoryURLs = ["/"]` to monitor all of Finder, filters the menu to text files only in `menu(for:)`, calls `ClipboardService` on selection.
+- **`extension/Info.plist`** — declares `com.apple.FinderSync` extension point with `FinderSyncExtension` as the principal class.
+- **`extension/copy-to-clipboard-extension.entitlements`** — sandbox entitlements required for pluginkit to load the extension: `app-sandbox`, `files.user-selected.read-only`, and a temporary exception for read access to `/`.
 
 `src/main.swift` uses explicit `NSApplication.shared` setup instead of `@NSApplicationMain` because the app has no NIB or storyboard.
+
+## Signing requirements
+
+The FinderSync extension **requires Apple Development signing** — pluginkit on macOS 26 refuses to load ad-hoc signed extensions regardless of location.
+
+Setup:
+1. Register a free Apple Developer account at developer.apple.com
+2. In Xcode → Settings → Accounts, add your Apple ID and create an Apple Development certificate
+3. In Xcode → project → Signing & Capabilities, set your team for all three targets
+4. `DEVELOPMENT_TEAM` is intentionally blank in the committed `project.pbxproj` — set it in Xcode
+
+The main app uses Automatic signing. The extension must be in `/Applications` (not `~/Applications`) for pluginkit to load it.
+
+After install, enable the extension:
+**System Settings → Privacy & Security → Extensions → Finder → Copy Contents to Clipboard ✓**
 
 ## Key invariants
 
@@ -42,11 +69,13 @@ The NSServices entry point is wired in `src/Info.plist` under `NSServices`. The 
 
 **`usedEncoding:` + Windows-1252 fallback** — macOS 26 tightened encoding auto-detection and no longer recognises Windows-1252 (bytes like `0xA9` for ©, `0x80` for €). `String(contentsOf:usedEncoding:)` is tried first for UTF-8 and UTF-16 (BOM-detected); if it throws, `.windowsCP1252` is tried explicitly. Do not add further fallbacks — `.isoLatin1` and `.utf16` are handled by the two steps above and are dead code if added.
 
-**No sandbox** — The app needs arbitrary filesystem read access. Do not enable the App Sandbox entitlement; it will break on any file outside the container.
+**Main app: no sandbox. Extension: sandboxed.** — The main app needs arbitrary filesystem read access; do not add the App Sandbox entitlement to it. The extension must be sandboxed (pluginkit requirement) with a `temporary-exception.files.absolute-path.read-only = ["/"]` entitlement to read files outside the container.
 
-**No config file** — There is no settings file and none should be added. `NSSendFileTypes = public.text` in `Info.plist` is the runtime type filter; OSLog `.debug` needs no toggle.
+**Extension must live in `/Applications`** — pluginkit only registers extensions from the system Applications folder. `~/Applications` is ignored.
 
-**Ad-hoc signing only** — `CODE_SIGN_IDENTITY = "-"`. No Apple Developer account or provisioning profile. Users must right-click → Open once to clear Gatekeeper on first launch.
+**Menu filtering in the extension** — `menu(for:)` in `FinderSyncExtension` must check the file's UTI before returning a menu. Without this gate, the item appears for all file types including images.
+
+**No config file** — There is no settings file and none should be added. `NSSendFileTypes = public.text` in `Info.plist` is the runtime type filter for NSServices; the FinderSync extension filters by UTI at runtime. OSLog `.debug` needs no toggle.
 
 ## Tests
 

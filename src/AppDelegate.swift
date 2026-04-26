@@ -10,14 +10,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func registerServiceIfNeeded() {
-        let defaults = UserDefaults.standard
-        guard !defaults.bool(forKey: "hasRegistered") else { return }
         let task = Process()
         task.launchPath = "/System/Library/CoreServices/pbs"
         task.arguments = ["-update"]
         try? task.run()
         task.waitUntilExit()
-        defaults.set(true, forKey: "hasRegistered")
         logger.debug("NSService registered via pbs -update")
     }
 
