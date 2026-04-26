@@ -2,27 +2,27 @@
 
 global:
   coupling-cohesion:
-    description: Needs description - run /index-standards
+    description: Low coupling and high cohesion — minimize inter-module dependencies; each module does one thing well
   delegation:
-    description: Needs description - run /index-standards
+    description: Delegation pattern — an object forwards a request to a helper rather than handling it directly
   dry:
-    description: Needs description - run /index-standards
+    description: DRY is about eliminating knowledge duplication, not textual repetition — one authoritative source per concept
   gang-of-four:
-    description: Needs description - run /index-standards
+    description: 23 classic OO design patterns (creational, structural, behavioral) from Gamma et al.
   hexagonal-architecture:
-    description: Needs description - run /index-standards
+    description: Ports-and-adapters — isolate domain logic from infrastructure and UI behind narrow interface boundaries
   object-interaction:
-    description: Needs description - run /index-standards
+    description: Law of Demeter and Tell-Don't-Ask — tell collaborators what to do; don't query their internals
   progressive-enhancement:
-    description: Needs description - run /index-standards
+    description: Build a working core first, then layer enhancements — graceful degradation under minimal conditions
   simplicity:
-    description: Needs description - run /index-standards
+    description: Simplicity as active discipline — fewest moving parts, maximum clarity, resist speculative complexity
   solid:
-    description: Needs description - run /index-standards
+    description: SOLID principles — Single Responsibility, Open/Closed, Liskov, Interface Segregation, Dependency Inversion
   tdd-workflow:
-    description: Needs description - run /index-standards
+    description: Red-green-refactor TDD loop — write a failing test first, make it pass, then clean up
   value-objects:
-    description: Needs description - run /index-standards
+    description: Value objects — identity defined by value not reference; immutable, equality by content
 
 clipboard:
   pasteboard:
@@ -34,4 +34,4 @@ logging:
 
 macos:
   services:
-    description: NSServices Info.plist registration, first-launch pbs -update, and single-file handler pattern
+    description: NSServices (macOS 13-25) and FinderSync extension (macOS 26+) wiring, registration, and handler patterns
