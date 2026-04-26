@@ -5,7 +5,7 @@ APP      = copy-to-clipboard.app
 INSTALL  = $(HOME)/Applications
 DMG      = copy-to-clipboard.dmg
 
-.PHONY: build test install dmg clean
+.PHONY: build test install dmg clean register
 
 build:
 	xcodebuild -project $(PROJECT) -scheme $(SCHEME) \
@@ -29,6 +29,9 @@ dmg: build
 		-ov -format UDZO "$(DMG)"
 	@echo "DMG created: $(DMG)"
 	$(MAKE) clean
+
+register:
+	pluginkit -e use -i com.psenger.copy-to-clipboard.extension
 
 clean:
 	rm -rf $(BUILD_DIR)

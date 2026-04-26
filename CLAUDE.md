@@ -12,11 +12,14 @@ make dmg      # Build and create copy-to-clipboard.dmg in project root
 make clean    # Remove build/
 ```
 
-After `make install`, copy to `/Applications` and restart Finder:
+After `make install`, copy to `/Applications`, restart Finder, then re-register the extension:
 ```bash
 sudo cp -R ~/Applications/copy-to-clipboard.app /Applications/
 killall Finder
+make register
 ```
+
+`make register` runs `pluginkit -e use -i com.psenger.copy-to-clipboard.extension`. Every rebuild changes the extension's CDHash, which causes pluginkit to reset its enabled state. This must be run after each `sudo cp` during development. End users installing from a DMG enable the extension once via System Settings → Privacy & Security → Extensions → Finder instead.
 
 Run a single test:
 ```bash
