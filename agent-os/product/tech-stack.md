@@ -12,12 +12,13 @@
 
 ## Services integration
 
-- **NSServices** — `NSSendFileTypes = public.text` in `Info.plist`; `@objc copyFileContents(_:userData:error:)` on `AppDelegate`
-- **LaunchServices** — `LSBackgroundOnly = true`, `LSUIElement = true`; `pbs -update` on first launch to register with Finder
+- **NSServices** — `NSSendFileTypes = public.text` in `Info.plist`; `@MainActor @objc copyFileContents(_:userData:error:)` on `AppDelegate`; `pbs -update` on every launch to register with Finder
+- **FinderSync** — `FIFinderSync` extension in `extension/`; surfaces the menu item directly in Finder's context menu on macOS 26+ where NSServices no longer appears
+- **LaunchServices** — `LSBackgroundOnly = true`, `LSUIElement = true`
 
 ## Logging
 
-- **OSLog** — `Logger(subsystem:category:)` with always-on `.debug` level; no config toggle
+- **OSLog** — `Logger(subsystem:category:)` with `.debug` for flow and `.error` for failures; no config toggle
 
 ## Testing
 
@@ -28,7 +29,7 @@
 
 - **Xcode 15+** with hand-crafted `project.pbxproj` (no CocoaPods, no SPM)
 - **Make** — `make build`, `make test`, `make install`, `make clean`
-- **Ad-hoc code signing** (`codesign --sign -`) — no Apple Developer account or provisioning profile
+- **Ad-hoc code signing** (`codesign --sign -`) for the main app; **Apple Development certificate** required for the FinderSync extension (pluginkit refuses ad-hoc signed extensions)
 
 ## Frontend / Backend / Database
 
